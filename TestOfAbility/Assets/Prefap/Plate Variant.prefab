@@ -52,7 +52,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: Plate Variant
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4514856455867777714, guid: aec782e340063ec458878c290092bffc, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

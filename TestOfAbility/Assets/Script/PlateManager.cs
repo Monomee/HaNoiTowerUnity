@@ -3,83 +3,70 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using Unity.VisualScripting;
-
+using System;
+using System.Linq;
 public class PlateManager : MonoBehaviour
 {
   
     public Stack<GameObject> stack = new Stack<GameObject>();
-    public HashSet<GameObject> set = new HashSet<GameObject>();
 
-    bool isAdd;
-    bool isRemove;
+    bool isDrop = false;
+    bool isPick = false;
 
-    public Transform curTransform;
+    public GameObject pickObj;
+    public GameObject dropObj;
 
-    // Start is called before the first frame update
-    void Awake()
-    {
-        isAdd = true;
-        isRemove = true;
-    }
- 
-    public Transform getCurTrans()
-    {
-        curTransform = stack.Peek().transform;
-        return curTransform;
-    }
-
-    public void checkStackAndSet()
+    public void checkStack()
     {
         Debug.Log("Stack: " +  stack.Count);
-        Debug.Log("Set: " +  set.Count);
     }
 
-    //private void OnTriggerStay2D(Collider2D other)
-    //{
-    //    if (PlateManager.instance.stack.Count == 0)
-    //    {
-    //        if (other.CompareTag("Plate")) PlateManager.instance.isAdd = true;
-    //    }
-    //    else
-    //    {
-    //        if(other.gameObject.transform.localScale.x > PlateManager.instance.stack.Peek().transform.localScale.x)
-    //        {
-    //            PlateManager.instance.isAdd = false;
-    //        }
-    //        else
-    //        {
-    //            if (other.CompareTag("Plate")) PlateManager.instance.isAdd = true;
-    //        }
-    //    }
-    //    if (PlateManager.instance.isAdd)
-    //    {
-    //        if (!PlateManager.instance.set.Contains(other.gameObject)) // Kiểm tra nếu object chưa có trong stack
-    //        {
-    //            other.transform.position = new Vector3(this.transform.position.x, other.transform.position.y, other.transform.position.z);
-    //            PlateManager.instance.stack.Push(other.gameObject);
-    //            PlateManager.instance.set.Add(other.gameObject);
-    //        }
-    //    }
-    //    else
-    //    {
-    //        //other.transform.position = PlateManager.instance.getCurTrans().position;
-    //    }
-    //}
     GameObject plate;
-    private void OnTriggerEnter2D(Collider2D other)
+    public void pick()
     {
-        if (other.CompareTag("Player"))
+        if (GameManager.Instance.movePlate.Count == 1) isPick = false;
+        else if (stack.Count != 0)
         {
-            Debug.Log("Player Enter");
-            if (this.gameObject.GetComponent<PlateManager>().stack.Count != 0)
+            isPick = true;
+        }
+        if (isPick)
+        {
+            //Debug.Log("Pick");
+            //Debug.Log("Before: " + GameManager.Instance.movePlate.Count);
+            plate = stack.Pop();
+            GameManager.Instance.movePlate.Push(plate);
+            plate.GetComponent<Rigidbody2D>().gravityScale = 0;
+            plate.GetComponent<BoxCollider2D>().enabled = false;
+            plate.transform.position = new Vector3(this.transform.position.x, this.transform.position.y + 4, this.transform.position.z);
+            //Debug.Log("After: " + GameManager.Instance.movePlate.Count);
+        }
+    }
+    public void drop()
+    {
+         if (stack.Count == 0) isDrop = true; 
+        else if (GameManager.Instance.movePlate.Count != 0 && GameManager.Instance.movePlate.Peek().transform.localScale.x < stack.Peek().transform.localScale.x)
+        {
+            isDrop = true;
+        }else 
+        { 
+            isDrop=false;
+        }
+        if (isDrop)
+        {
+            //Debug.Log("Drop");
+            plate = GameManager.Instance.movePlate.Pop();
+            stack.Push(plate);
+            plate.transform.position = new Vector3(this.transform.position.x, this.transform.position.y + 4, this.transform.position.z);
+            plate.GetComponent<Rigidbody2D>().gravityScale = 1;
+            plate.GetComponent<BoxCollider2D>().enabled = true;
+            GameManager.Instance.count++;
+            GameManager.Instance.updateCount();
+        }
+        if (this.tag.CompareTo("C3") == 0)
+        {
+            if (stack.SequenceEqual(GameManager.Instance.firstOne))
             {
-                Debug.Log("Pick");
-                plate = this.gameObject.GetComponent<PlateManager>().stack.Pop();
-                this.gameObject.GetComponent<PlateManager>().set.Remove(plate);
-                plate.GetComponent<Rigidbody2D>().gravityScale = 0;
-                plate.GetComponent<BoxCollider2D>().enabled = false;
-                plate.transform.SetParent(other.transform);
-                plate.transform.position = new Vector3(other.transform.position.x, other.transform.position.y + 1, other.transform.position.z);
+                GameManager.Instance.win.SetActive(true);
             }
         }
     }

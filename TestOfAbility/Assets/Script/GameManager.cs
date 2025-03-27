@@ -1,6 +1,7 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -19,6 +20,7 @@ public class GameManager : MonoBehaviour
 
     public TextMeshProUGUI textNum;
     public TextMeshProUGUI textCount;
+    public int count=0;
     
     int numberOfPlate = 0;
     public GameObject platePrefab;
@@ -31,6 +33,11 @@ public class GameManager : MonoBehaviour
     public GameObject column1;
     public GameObject column2;
     public GameObject column3;
+
+    public Stack<GameObject> firstOne = new Stack<GameObject>();
+    public Stack<GameObject> movePlate = new Stack<GameObject>();
+
+    public GameObject win;
     // Start is called before the first frame update
     void Start()
     {
@@ -40,7 +47,8 @@ public class GameManager : MonoBehaviour
         add(column1);
         add(column1);
         add(column1);
-        textNum.text = ("Number of Plate: " + numberOfPlate.ToString());
+        updatePlateCount();
+        updateCount();
     }
 
     public void RestartGame()
@@ -64,7 +72,7 @@ public class GameManager : MonoBehaviour
         {
             add(column1);
         }
-        textNum.text = ("Number of Plate: " + numberOfPlate.ToString());
+        updatePlateCount();
     }
 
     public void removePlateButton()
@@ -83,24 +91,34 @@ public class GameManager : MonoBehaviour
         {
             remove(column1);
         }
-        textNum.text = ("Number of Plate: " + numberOfPlate.ToString());
+        updatePlateCount();
     }
 
     public void add(GameObject column)
     {
         newPlate = Instantiate(platePrefab, column.transform);
         column.GetComponent<PlateManager>().stack.Push(newPlate);
-        column.GetComponent<PlateManager>().set.Add(newPlate);
         newPlate.transform.position = new Vector3(column.transform.position.x, column.transform.position.y + numberOfPlate - 2, column.transform.position.z);
         newPlate.transform.localScale = new Vector3(scaleX - 2 * numberOfPlate, newPlate.transform.localScale.y, newPlate.transform.localScale.z);
         numberOfPlate++;
+        firstOne.Push(newPlate);
+        Debug.Log("Ban đầu: "+firstOne.Count);
     }
 
     public void remove(GameObject column)
     {
         newPlate = column.GetComponent<PlateManager>().stack.Pop();
-        column.GetComponent<PlateManager>().set.Remove(newPlate);
         Destroy(newPlate);
         numberOfPlate--;
+        firstOne.Pop();
+        Debug.Log("Ban đầu: " + firstOne.Count);
+    }
+    public void updateCount()
+    {
+        textCount.text = ("Count: " + count.ToString());
+    }
+    public void updatePlateCount()
+    {
+        textNum.text = ("Number of Plate: " + numberOfPlate.ToString());
     }
 }
