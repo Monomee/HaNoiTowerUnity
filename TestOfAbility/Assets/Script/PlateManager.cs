@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -6,82 +6,81 @@ using Unity.VisualScripting;
 
 public class PlateManager : MonoBehaviour
 {
-    public List<GameObject> plateList;
-    public Stack<GameObject> plateStack = new Stack<GameObject>();
-    int numberOfPlate = 3;
-
-    public TextMeshProUGUI textNum;
-    public TextMeshProUGUI textCount;
-
-    public GameObject platePrefab;
-    GameObject newPlate;
-    Transform newPos;
-    float scaleX;
+  
+    public Stack<GameObject> stack = new Stack<GameObject>();
+    public HashSet<GameObject> set = new HashSet<GameObject>();
 
     bool isAdd;
     bool isRemove;
+
+    public Transform curTransform;
 
     // Start is called before the first frame update
     void Awake()
     {
         isAdd = true;
         isRemove = true;
-        textNum.text = ("Number of Plate: "+ numberOfPlate.ToString());
-        scaleX = platePrefab.transform.localScale.x;       
-        for (int i = 0; i < numberOfPlate; i++)
-        {
-            plateStack.Push(plateList[i]);
-        }
+    }
+ 
+    public Transform getCurTrans()
+    {
+        curTransform = stack.Peek().transform;
+        return curTransform;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void checkStackAndSet()
     {
-        
+        Debug.Log("Stack: " +  stack.Count);
+        Debug.Log("Set: " +  set.Count);
     }
 
-    public void addPlate()
+    //private void OnTriggerStay2D(Collider2D other)
+    //{
+    //    if (PlateManager.instance.stack.Count == 0)
+    //    {
+    //        if (other.CompareTag("Plate")) PlateManager.instance.isAdd = true;
+    //    }
+    //    else
+    //    {
+    //        if(other.gameObject.transform.localScale.x > PlateManager.instance.stack.Peek().transform.localScale.x)
+    //        {
+    //            PlateManager.instance.isAdd = false;
+    //        }
+    //        else
+    //        {
+    //            if (other.CompareTag("Plate")) PlateManager.instance.isAdd = true;
+    //        }
+    //    }
+    //    if (PlateManager.instance.isAdd)
+    //    {
+    //        if (!PlateManager.instance.set.Contains(other.gameObject)) // Kiểm tra nếu object chưa có trong stack
+    //        {
+    //            other.transform.position = new Vector3(this.transform.position.x, other.transform.position.y, other.transform.position.z);
+    //            PlateManager.instance.stack.Push(other.gameObject);
+    //            PlateManager.instance.set.Add(other.gameObject);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        //other.transform.position = PlateManager.instance.getCurTrans().position;
+    //    }
+    //}
+    GameObject plate;
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        numberOfPlate++;
-        if (numberOfPlate > 8)
+        if (other.CompareTag("Player"))
         {
-            numberOfPlate = 8;
-            isAdd = false;
-        }
-        else
-        {
-            isAdd = true;
-        }
-        textNum.text = ("Number of Plate: " + numberOfPlate.ToString());
-        if (isAdd)
-        {
-            newPlate = Instantiate(platePrefab, this.transform);
-            newPlate.transform.position = new Vector3(this.transform.position.x, this.transform.position.y + 3, this.transform.position.z);
-            newPlate.transform.localScale = new Vector3(scaleX - 2 * (numberOfPlate - 4), newPlate.transform.localScale.y, newPlate.transform.localScale.z);
-            plateStack.Push(newPlate);
-            Debug.Log(plateStack.Count);
-        }
-        
-    }
-
-    public void removePlate()
-    {
-        numberOfPlate--;
-        if (numberOfPlate < 3)
-        {
-            numberOfPlate = 3;
-            isRemove = false;
-        }
-        else
-        {
-            isRemove = true;
-        }
-        textNum.text = ("Number of Plate: " + numberOfPlate.ToString());
-        if (isRemove)
-        {
-            newPlate = plateStack.Pop();
-            Destroy(newPlate);
-            Debug.Log(plateStack.Count);
+            Debug.Log("Player Enter");
+            if (this.gameObject.GetComponent<PlateManager>().stack.Count != 0)
+            {
+                Debug.Log("Pick");
+                plate = this.gameObject.GetComponent<PlateManager>().stack.Pop();
+                this.gameObject.GetComponent<PlateManager>().set.Remove(plate);
+                plate.GetComponent<Rigidbody2D>().gravityScale = 0;
+                plate.GetComponent<BoxCollider2D>().enabled = false;
+                plate.transform.SetParent(other.transform);
+                plate.transform.position = new Vector3(other.transform.position.x, other.transform.position.y + 1, other.transform.position.z);
+            }
         }
     }
 }
