@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Player : MonoBehaviour
+public class Player2 : MonoBehaviour
 {
     [SerializeField] Rigidbody2D rb;
     float dirX;
@@ -33,7 +33,7 @@ public class Player : MonoBehaviour
         HoldAnimationActive();
         pickPlate();
         dropPlate();
-        if(GameManager.Instance.movePlate.Count != 0) GameManager.Instance.movePlate.Peek().transform.position = new Vector3(this.transform.position.x, this.transform.position.y+1);
+        if(GameManager2.Instance.movePlate.Count != 0) GameManager2.Instance.movePlate.Peek().transform.position = new Vector3(this.transform.position.x, this.transform.position.y+1);
     }
     void MoveAnimationActive()
     {

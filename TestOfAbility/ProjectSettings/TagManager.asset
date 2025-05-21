@@ -8,11 +8,12 @@ TagManager:
   - C1
   - C2
   - C3
+  - Spawn
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Button
+  - Interactable
   - Water
   - UI
   - 
